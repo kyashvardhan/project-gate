@@ -3,670 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GATE 2026 - Mission AIR 1 Dashboard</title>
+    <title>GATE 2026 - AIR 1 Command Center</title>
+    
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #f0f0f0;
-        }
-        .card {
-            background-color: rgba(26, 26, 26, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .progress-bar-bg {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .progress-bar-fill {
-            background: linear-gradient(90deg, #4f46e5, #c026d3);
-            transition: width 0.5s ease-in-out;
-        }
-        .task-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        .task-item input:checked + label {
-            text-decoration: line-through;
-            color: #6b7280;
-        }
-        .header-glow {
-            text-shadow: 0 0 15px rgba(192, 38, 211, 0.6), 0 0 5px rgba(79, 70, 229, 0.6);
-        }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1a1a1a; }
-        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #c026d3; }
-        
-        /* Gemini Modal Styles */
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 50;
-            display: none; /* Hidden by default */
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .modal-content {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 60;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            display: none; /* Hidden by default */
-            opacity: 0;
-            transform: translate(-50%, -45%);
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-        }
-        .modal-backdrop.show, .modal-content.show {
-            display: block;
-            opacity: 1;
-        }
-        .modal-content.show {
-            transform: translate(-50%, -50%);
-        }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-left-color: #c026d3;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
     
-    <!-- FIREBASE SETUP SCRIPT -->
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-      // We only need the Firestore database for this project
-      import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <!-- Our Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
 
-      // Your web app's Firebase configuration (FROM YOUR CONSOLE)
-      const firebaseConfig = {
-        apiKey: "AIzaSyDNgieI85u3n1iR3TfPPUGGzvjG5OVsByI",
-        authDomain: "project-x-dfa14.firebaseapp.com",
-        projectId: "project-x-dfa14",
-        storageBucket: "project-x-dfa14.appspot.com",
-        messagingSenderId: "870709683376",
-        appId: "1:870709683376:web:2dca1b1ff58781cfc9c775",
-        measurementId: "G-W8P16T5RE4"
-      };
-
-      // Initialize Firebase and Firestore
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-
-      // Make db and Firestore functions accessible globally so other functions in our main script can use them
-      window.db = db;
-      window.doc = doc;
-      window.setDoc = setDoc;
-      window.getDoc = getDoc;
-    </script>
 </head>
-<body class="min-h-screen p-4 sm:p-6 lg:p-8 bg-dots-pattern">
+<body class="min-h-screen p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <header class="text-center mb-8">
-            <h1 class="text-4xl sm:text-5xl font-black tracking-tighter header-glow">GATE 2026 - Mission AIR 1</h1>
-            <p class="text-lg text-gray-400 mt-2">Your Personal AI-Powered Command Center</p>
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tighter header-glow">GATE 2026 - AIR 1 Command Center</h1>
+            <p class="text-lg text-gray-400 mt-2">Your Integrated Cognitive Enhancement System</p>
         </header>
 
-        <!-- Countdown and Main Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Countdown Timer -->
-            <div class="card rounded-2xl p-6 flex flex-col items-center justify-center">
-                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">SYLLABUS DEADLINE</h2>
-                <div id="countdown" class="flex space-x-4 text-center">
-                    <div><span id="days" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Days</span></div>
-                    <div><span id="hours" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Hours</span></div>
-                    <div><span id="minutes" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Mins</span></div>
-                    <div><span id="seconds" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Secs</span></div>
-                </div>
-            </div>
+        <!-- Navigation -->
+        <nav class="flex justify-center space-x-2 sm:space-x-4 mb-8">
+            <button onclick="switchView('planner')" class="nav-item active flex items-center space-x-2 py-2 px-4 rounded-full">
+                <i data-feather="calendar"></i>
+                <span>Planner</span>
+            </button>
+            <button onclick="switchView('hub')" class="nav-item flex items-center space-x-2 py-2 px-4 rounded-full">
+                <i data-feather="database"></i>
+                <span>Knowledge Hub</span>
+            </button>
+             <button onclick="switchView('strategy')" class="nav-item flex items-center space-x-2 py-2 px-4 rounded-full">
+                <i data-feather="target"></i>
+                <span>Strategy Room</span>
+            </button>
+            <button onclick="switchView('analytics')" class="nav-item flex items-center space-x-2 py-2 px-4 rounded-full">
+                <i data-feather="bar-chart-2"></i>
+                <span>Analytics</span>
+            </button>
+        </nav>
 
-            <!-- Overall Progress -->
-            <div class="card rounded-2xl p-6 md:col-span-1 lg:col-span-2 flex items-center space-x-6">
-                <div class="relative w-32 h-32">
-                    <svg class="w-full h-full" viewBox="0 0 36 36">
-                        <path class="text-gray-700" stroke-width="3" stroke="currentColor" fill="none"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path id="overall-progress-circle" class="text-purple-500" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none"
-                              stroke-dasharray="100, 100"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    </svg>
-                    <div id="overall-progress-text" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold">0%</div>
-                </div>
-                <div>
-                    <h2 class="text-lg font-bold">Overall Progress</h2>
-                    <p class="text-gray-400">Total syllabus completion towards Nov 30, 2025.</p>
-                </div>
-            </div>
-            
-            <!-- Current Focus -->
-            <div class="card rounded-2xl p-6 flex flex-col justify-center">
-                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Current Focus</h2>
-                <div class="flex items-center space-x-3">
-                    <i data-feather="crosshair" class="text-purple-400"></i>
-                    <span id="current-focus" class="text-xl font-bold">Initializing...</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content: Subjects and Report -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Subjects Column -->
-            <div class="lg:col-span-2 space-y-6">
-                <h2 class="text-2xl font-bold tracking-tight">Subject Mastery Plan</h2>
-                <div id="subjects-container" class="space-y-4">
-                    <!-- Subject cards will be injected here by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Report Column -->
-            <div class="space-y-6">
-                <h2 class="text-2xl font-bold tracking-tight">Performance Analytics</h2>
-                <div class="card rounded-2xl p-6">
-                    <h3 class="font-semibold mb-4">Time Distribution by Subject</h3>
-                    <canvas id="reportChart"></canvas>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <h3 class="font-semibold mb-4">Summary</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400">Total Tasks Completed</span>
-                            <span id="total-tasks-completed" class="font-bold text-lg">0</span>
+        <!-- Main Content Views -->
+        <main>
+            <!-- Planner View -->
+            <div id="planner-view" class="view active">
+                <!-- Countdown and Main Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card rounded-2xl p-6 flex flex-col items-center justify-center">
+                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">SYLLABUS DEADLINE</h2>
+                        <div id="countdown" class="flex space-x-4 text-center">
+                            <div><span id="days" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Days</span></div>
+                            <div><span id="hours" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Hours</span></div>
+                            <div><span id="minutes" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Mins</span></div>
+                            <div><span id="seconds" class="text-4xl font-bold">00</span><span class="block text-xs text-gray-500">Secs</span></div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400">Total Tasks</span>
-                            <span id="total-tasks" class="font-bold text-lg">0</span>
+                    </div>
+                    <div class="card rounded-2xl p-6 md:col-span-1 lg:col-span-2 flex items-center space-x-6">
+                        <div class="relative w-32 h-32">
+                            <svg class="w-full h-full" viewBox="0 0 36 36"><path class="text-gray-700" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /><path id="overall-progress-circle" class="text-purple-500" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" /></svg>
+                            <div id="overall-progress-text" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-3xl font-bold">0%</div>
+                        </div>
+                        <div><h2 class="text-lg font-bold">Overall Progress</h2><p class="text-gray-400">Total syllabus completion towards Nov 30, 2025.</p></div>
+                    </div>
+                    <div class="card rounded-2xl p-6 flex flex-col justify-center">
+                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Current Focus</h2>
+                        <div class="flex items-center space-x-3"><i data-feather="crosshair" class="text-purple-400"></i><span id="current-focus" class="text-xl font-bold">Initializing...</span></div>
+                    </div>
+                </div>
+                <!-- Subjects Container -->
+                <div id="subjects-container" class="space-y-4"></div>
+            </div>
+
+            <!-- Knowledge Hub View -->
+            <div id="hub-view" class="view">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold tracking-tight">Knowledge Hub</h2>
+                    <button onclick="showAddSubjectModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full flex items-center space-x-2"><i data-feather="plus"></i><span>Add Subject</span></button>
+                </div>
+                <div id="knowledge-hub-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- Strategy Room View -->
+            <div id="strategy-view" class="view">
+                 <h2 class="text-2xl font-bold tracking-tight mb-6">Strategy Room</h2>
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Mistake Tracker -->
+                    <div class="card rounded-2xl p-6">
+                        <h3 class="font-semibold mb-4 text-lg">Mistake Tracker</h3>
+                        <div class="space-y-4 mb-4">
+                            <input id="mistake-subject" type="text" placeholder="Subject (e.g., OS)" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <input id="mistake-topic" type="text" placeholder="Topic (e.g., Paging)" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <textarea id="mistake-note" placeholder="Note: Why was it wrong? What's the correct concept?" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500" rows="3"></textarea>
+                            <button onclick="addMistake()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full">Log Mistake</button>
+                        </div>
+                        <div id="mistake-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                    </div>
+                    <!-- PYQ Counter -->
+                    <div class="card rounded-2xl p-6">
+                        <h3 class="font-semibold mb-4 text-lg">PYQ Counter</h3>
+                        <div class="text-center">
+                            <p class="text-gray-400">Total PYQs Solved</p>
+                            <p id="pyq-count" class="text-7xl font-black header-glow my-4">0</p>
+                            <div class="flex justify-center space-x-2">
+                                <button onclick="updatePyqCount(1)" class="bg-gray-700 hover:bg-gray-600 font-bold py-2 px-4 rounded-full">+1</button>
+                                <button onclick="updatePyqCount(5)" class="bg-gray-700 hover:bg-gray-600 font-bold py-2 px-4 rounded-full">+5</button>
+                                <button onclick="updatePyqCount(10)" class="bg-gray-700 hover:bg-gray-600 font-bold py-2 px-4 rounded-full">+10</button>
+                                <button onclick="updatePyqCount(-1)" class="bg-red-700 hover:bg-red-600 font-bold py-2 px-4 rounded-full">-1</button>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="analytics-view" class="view">
+                <h2 class="text-2xl font-bold tracking-tight mb-6">Performance Analytics</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card rounded-2xl p-6">
+                        <h3 class="font-semibold mb-4">Time Distribution by Subject (Tasks)</h3>
+                        <canvas id="reportChart"></canvas>
+                    </div>
+                    <div class="card rounded-2xl p-6">
+                        <h3 class="font-semibold mb-4">Summary</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center"><span class="text-gray-400">Total Tasks Completed</span><span id="total-tasks-completed" class="font-bold text-lg">0</span></div>
+                            <div class="flex justify-between items-center"><span class="text-gray-400">Total Tasks</span><span id="total-tasks" class="font-bold text-lg">0</span></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Gemini AI Modal -->
-    <div id="gemini-modal-backdrop" class="modal-backdrop"></div>
-    <div id="gemini-modal-content" class="modal-content card rounded-2xl p-6">
+    <!-- Modals -->
+    <div id="modal-backdrop" class="modal-backdrop"></div>
+    <div id="modal-content" class="modal-content card rounded-2xl p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 id="modal-title" class="text-xl font-bold header-glow">AI Assistant</h2>
-            <button onclick="closeModal()" class="text-gray-400 hover:text-white">
-                <i data-feather="x"></i>
-            </button>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i data-feather="x"></i></button>
         </div>
-        <div id="modal-body" class="prose prose-invert max-w-none">
-            <!-- Content will be injected here -->
-        </div>
+        <div id="modal-body" class="prose prose-invert max-w-none"></div>
     </div>
 
-    <script>
-        // --- DATA STRUCTURE FOR THE ENTIRE PLAN ---
-        const gatePlan = [
-            {
-                subject: "Discrete Mathematics",
-                duration: 14,
-                startDate: "2025-07-25",
-                endDate: "2025-08-07",
-                tasks: [
-                    { week: 1, day: "Day 1-2", topic: "Mathematical Logic: Propositional Logic" },
-                    { week: 1, day: "Day 3-5", topic: "Mathematical Logic: First-Order Logic & Inference" },
-                    { week: 2, day: "Day 6-7", topic: "Set Theory & Functions Fundamentals" },
-                    { week: 2, day: "Day 8-9", topic: "Combinatorics: Counting Principles, Pigeonhole" },
-                    { week: 2, day: "Day 10-11", topic: "Graph Theory: Basics, Traversals, Connectivity" },
-                    { week: 3, day: "Day 12", topic: "Group Theory Basics" },
-                    { week: 3, day: "Day 13-14", topic: "Full Subject PYQ Marathon & Revision" },
-                ]
-            },
-            {
-                subject: "Digital Logic",
-                duration: 8,
-                startDate: "2025-08-08",
-                endDate: "2025-08-15",
-                tasks: [
-                    { week: 3, day: "Day 1-2", topic: "Boolean Algebra & K-Maps" },
-                    { week: 3, day: "Day 3-4", topic: "Combinational Circuits (Adders, Mux)" },
-                    { week: 4, day: "Day 5-6", topic: "Sequential Circuits (Latches, Flip-Flops)" },
-                    { week: 4, day: "Day 7-8", topic: "FSM, Counters, and Registers" },
-                ]
-            },
-            {
-                subject: "Programming & Data Structures",
-                duration: 14,
-                startDate: "2025-08-16",
-                endDate: "2025-08-29",
-                tasks: [
-                    { week: 4, day: "Day 1-2", topic: "C Programming Basics & Pointers" },
-                    { week: 4, day: "Day 3-4", topic: "Arrays, Stacks, Queues" },
-                    { week: 5, day: "Day 5-7", topic: "Linked Lists (All types)" },
-                    { week: 5, day: "Day 8-10", topic: "Trees: BST, AVL, Heaps" },
-                    { week: 6, day: "Day 11-12", topic: "Graphs: Representation & Algorithms" },
-                    { week: 6, day: "Day 13-14", topic: "Hashing & Full Subject Revision" },
-                ]
-            },
-            {
-                subject: "Algorithms",
-                duration: 10,
-                startDate: "2025-08-30",
-                endDate: "2025-09-08",
-                tasks: [
-                    { week: 6, day: "Day 1-2", topic: "Asymptotic Analysis & Recurrences" },
-                    { week: 7, day: "Day 3-4", topic: "Divide & Conquer, Sorting" },
-                    { week: 7, day: "Day 5-6", topic: "Greedy Algorithms" },
-                    { week: 7, day: "Day 7-8", topic: "Dynamic Programming" },
-                    { week: 8, day: "Day 9-10", topic: "Graph Algorithms (MST, Shortest Paths)" },
-                ]
-            },
-            {
-                subject: "Computer Organization & Arch.",
-                duration: 14,
-                startDate: "2025-09-09",
-                endDate: "2025-09-22",
-                 tasks: [
-                    { week: 8, day: "Day 1-3", topic: "ISA, Machine Instructions, Addressing Modes" },
-                    { week: 8, day: "Day 4-6", topic: "CPU Datapath and Control Unit" },
-                    { week: 9, day: "Day 7-9", topic: "Pipelining and Hazards" },
-                    { week: 9, day: "Day 10-12", topic: "Memory Hierarchy & Caches (AMAT)" },
-                    { week: 10, day: "Day 13-14", topic: "I/O Interface and Full Revision" },
-                ]
-            },
-             {
-                subject: "Theory of Computation",
-                duration: 10,
-                startDate: "2025-09-23",
-                endDate: "2025-10-02",
-                tasks: [
-                    { week: 10, day: "Day 1-3", topic: "Finite Automata & Regular Expressions" },
-                    { week: 10, day: "Day 4-6", topic: "Regular & Context-Free Languages" },
-                    { week: 11, day: "Day 7-8", topic: "Pushdown Automata & Turing Machines" },
-                    { week: 11, day: "Day 9-10", topic: "Decidability and Undecidability" },
-                ]
-            },
-            {
-                subject: "Operating Systems",
-                duration: 14,
-                startDate: "2025-10-03",
-                endDate: "2025-10-16",
-                tasks: [
-                    { week: 11, day: "Day 1-3", topic: "Processes, Threads, CPU Scheduling" },
-                    { week: 12, day: "Day 4-6", topic: "Process Synchronization (Semaphores, etc.)" },
-                    { week: 12, day: "Day 7-9", topic: "Deadlocks" },
-                    { week: 13, day: "Day 10-12", topic: "Memory Management (Paging, VM)" },
-                    { week: 13, day: "Day 13-14", topic: "File Systems & Disk Scheduling" },
-                ]
-            },
-            {
-                subject: "Compiler Design",
-                duration: 7,
-                startDate: "2025-10-17",
-                endDate: "2025-10-23",
-                tasks: [
-                    { week: 13, day: "Day 1", topic: "Lexical Analysis" },
-                    { week: 13, day: "Day 2-3", topic: "Parsing (FIRST/FOLLOW, LR Parsers)" },
-                    { week: 14, day: "Day 4-5", topic: "Syntax Directed Translation" },
-                    { week: 14, day: "Day 6-7", topic: "Intermediate Code Gen & Code Optimization" },
-                ]
-            },
-            {
-                subject: "Database Management Systems",
-                duration: 10,
-                startDate: "2025-10-24",
-                endDate: "2025-11-02",
-                tasks: [
-                    { week: 14, day: "Day 1-2", topic: "ER Model, Relational Model" },
-                    { week: 14, day: "Day 3-4", topic: "Relational Algebra & SQL" },
-                    { week: 15, day: "Day 5-7", topic: "Normalization (1NF to BCNF)" },
-                    { week: 15, day: "Day 8-10", topic: "Transactions, Concurrency, Indexing" },
-                ]
-            },
-            {
-                subject: "Computer Networks",
-                duration: 13,
-                startDate: "2025-11-03",
-                endDate: "2025-11-15",
-                tasks: [
-                    { week: 15, day: "Day 1-2", topic: "OSI/TCP-IP Layers, Data Link Layer" },
-                    { week: 16, day: "Day 3-5", topic: "Network Layer (IP Addressing, Routing)" },
-                    { week: 16, day: "Day 6-8", topic: "Transport Layer (TCP/UDP, Congestion)" },
-                    { week: 17, day: "Day 9-11", topic: "Application Layer Protocols" },
-                    { week: 17, day: "Day 12-13", topic: "Full Subject Revision & PYQs" },
-                ]
-            },
-        ];
-
-        let progressData = {};
-        let reportChart;
-
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', init);
-
-        // UPDATED init function
-        function init() {
-            // This function starts everything when the page loads.
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-            feather.replace();
-            // The new loadProgress function will handle all the rendering
-            // after it successfully fetches your data from the database.
-            loadProgress();
-        }
-
-        // --- DATA HANDLING (DATABASE) ---
-        // UPDATED loadProgress function
-        async function loadProgress() {
-            // This function loads your progress from the cloud when the page opens.
-            if (!window.db) { // If Firebase isn't ready, it waits a moment and tries again.
-                setTimeout(loadProgress, 100);
-                return;
-            }
-            const progressDocRef = window.doc(window.db, "progress", "userData");
-            const docSnap = await window.getDoc(progressDocRef);
-
-            if (docSnap.exists()) {
-                // If progress is found in the database, it loads it.
-                progressData = docSnap.data();
-                console.log("Progress loaded from Firestore.");
-            } else {
-                // If it's your first time, it creates a fresh progress plan.
-                gatePlan.forEach((subject, sIndex) => {
-                    progressData[sIndex] = subject.tasks.map(() => false);
-                });
-                console.log("No existing progress found. Initializing new plan.");
-            }
-            
-            // After loading the data, it builds the dashboard on the screen.
-            renderSubjects();
-            updateOverallProgress();
-            renderReportChart();
-            updateCurrentFocus();
-        }
-
-        // UPDATED saveProgress function
-        async function saveProgress() {
-            // This function saves your current progress to the cloud.
-            if (!window.db) return; // Checks if Firebase is connected
-            try {
-                // Creates a reference to a document named "userData" inside a "progress" collection
-                const progressDocRef = window.doc(window.db, "progress", "userData");
-                // Saves your entire progressData object to that document
-                await window.setDoc(progressDocRef, progressData);
-                console.log("Progress saved to Firestore!");
-            } catch (e) {
-                console.error("Error saving progress: ", e);
-            }
-        }
-
-        // --- RENDERING ---
-        function renderSubjects() {
-            const container = document.getElementById('subjects-container');
-            container.innerHTML = '';
-            gatePlan.forEach((subject, sIndex) => {
-                const completedTasks = progressData[sIndex] ? progressData[sIndex].filter(Boolean).length : 0;
-                const totalTasks = subject.tasks.length;
-                const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-                const subjectCardHTML = `
-                    <div class="card rounded-2xl p-4 sm:p-6">
-                        <details>
-                            <summary class="flex justify-between items-center cursor-pointer">
-                                <div class="flex-grow">
-                                    <h3 class="text-lg font-bold">${subject.subject}</h3>
-                                    <p class="text-xs text-gray-400">${subject.startDate} to ${subject.endDate}</p>
-                                    <div class="mt-2">
-                                        <div class="progress-bar-bg w-full rounded-full h-2.5">
-                                            <div id="progress-${sIndex}" class="progress-bar-fill h-2.5 rounded-full" style="width: ${percentage}%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="ml-4 text-right">
-                                    <span class="text-xl font-bold">${percentage}%</span>
-                                    <span class="block text-xs text-gray-400">${completedTasks}/${totalTasks} tasks</span>
-                                </div>
-                            </summary>
-                            <div class="mt-4 border-t border-gray-700 pt-4">
-                                <div class="flex justify-end mb-2">
-                                    <button onclick="generatePracticeProblems('${subject.subject}')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-full flex items-center space-x-1">
-                                        <i data-feather="edit-3" class="w-3 h-3"></i>
-                                        <span>✨ Generate Practice Problems</span>
-                                    </button>
-                                </div>
-                                ${subject.tasks.map((task, tIndex) => `
-                                    <div class="task-item flex items-center p-2 rounded-lg justify-between">
-                                        <div class="flex items-center">
-                                            <input type="checkbox" id="task-${sIndex}-${tIndex}" class="h-4 w-4 rounded bg-gray-700 border-gray-600 text-purple-600 focus:ring-purple-500" 
-                                                onchange="updateProgress(${sIndex}, ${tIndex})" ${progressData[sIndex] && progressData[sIndex][tIndex] ? 'checked' : ''}>
-                                            <label for="task-${sIndex}-${tIndex}" class="ml-3 text-sm text-gray-300">
-                                                <span class="font-semibold">${task.day}:</span> ${task.topic}
-                                            </label>
-                                        </div>
-                                        <button onclick="getAITutorExplanation('${task.topic}')" class="ml-4 p-1 text-gray-400 hover:text-purple-400" title="✨ AI Tutor: Explain this topic">
-                                            <i data-feather="sparkles" class="w-4 h-4"></i>
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </details>
-                    </div>
-                `;
-                container.innerHTML += subjectCardHTML;
-            });
-            feather.replace();
-        }
-
-        function renderReportChart() {
-            const ctx = document.getElementById('reportChart').getContext('2d');
-            const labels = gatePlan.map(s => s.subject);
-            const data = gatePlan.map((subject, sIndex) => progressData[sIndex] ? progressData[sIndex].filter(Boolean).length : 0);
-
-            reportChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Tasks Completed',
-                        data: data,
-                        backgroundColor: [
-                            '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f472b6',
-                            '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16'
-                        ],
-                        borderColor: '#1a1a1a',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#9ca3af',
-                                boxWidth: 12,
-                                padding: 15,
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // --- UPDATE LOGIC ---
-        function updateProgress(sIndex, tIndex) {
-            progressData[sIndex][tIndex] = !progressData[sIndex][tIndex];
-            saveProgress(); // This now saves to Firestore
-
-            const completedTasks = progressData[sIndex].filter(Boolean).length;
-            const totalTasks = gatePlan[sIndex].tasks.length;
-            const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-            document.getElementById(`progress-${sIndex}`).style.width = `${percentage}%`;
-            document.querySelector(`#subjects-container > div:nth-child(${sIndex + 1}) .text-xl`).textContent = `${percentage}%`;
-            document.querySelector(`#subjects-container > div:nth-child(${sIndex + 1}) .text-xs.text-gray-400`).textContent = `${completedTasks}/${totalTasks} tasks`;
-
-            updateOverallProgress();
-            updateReportChartData();
-        }
-
-        function updateOverallProgress() {
-            let totalCompleted = 0;
-            let totalTasks = 0;
-            gatePlan.forEach((subject, sIndex) => {
-                if (progressData[sIndex]) {
-                    totalCompleted += progressData[sIndex].filter(Boolean).length;
-                }
-                totalTasks += subject.tasks.length;
-            });
-            
-            const overallPercentage = totalTasks > 0 ? Math.round((totalCompleted / totalTasks) * 100) : 0;
-            
-            const circle = document.getElementById('overall-progress-circle');
-            const text = document.getElementById('overall-progress-text');
-            circle.style.strokeDasharray = `${overallPercentage}, 100`;
-            text.textContent = `${overallPercentage}%`;
-
-            document.getElementById('total-tasks-completed').textContent = totalCompleted;
-            document.getElementById('total-tasks').textContent = totalTasks;
-        }
-
-        function updateReportChartData() {
-            if (reportChart) {
-                reportChart.data.datasets[0].data = gatePlan.map((subject, sIndex) => progressData[sIndex] ? progressData[sIndex].filter(Boolean).length : 0);
-                reportChart.update();
-            }
-        }
-
-        function updateCountdown() {
-            const countDownDate = new Date("Nov 30, 2025 23:59:59").getTime();
-            const now = new Date().getTime();
-            const distance = countDownDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById("days").innerText = String(days).padStart(2, '0');
-            document.getElementById("hours").innerText = String(hours).padStart(2, '0');
-            document.getElementById("minutes").innerText = String(minutes).padStart(2, '0');
-            document.getElementById("seconds").innerText = String(seconds).padStart(2, '0');
-        }
-        
-        function updateCurrentFocus() {
-            const today = new Date();
-            today.setHours(0,0,0,0); 
-
-            let currentSubject = "Plan Complete!";
-            for (const subject of gatePlan) {
-                const startDate = new Date(subject.startDate);
-                const endDate = new Date(subject.endDate);
-                if (today >= startDate && today <= endDate) {
-                    currentSubject = subject.subject;
-                    break;
-                }
-            }
-             if (currentSubject === "Plan Complete!" && today < new Date(gatePlan[0].startDate)) {
-                currentSubject = "Prep starts soon!";
-            }
-            document.getElementById('current-focus').textContent = currentSubject;
-        }
-
-        // --- GEMINI API FEATURES ---
-        const modalBackdrop = document.getElementById('gemini-modal-backdrop');
-        const modalContent = document.getElementById('gemini-modal-content');
-        const modalTitle = document.getElementById('modal-title');
-        const modalBody = document.getElementById('modal-body');
-
-        function showModal() {
-            modalBackdrop.classList.add('show');
-            modalContent.classList.add('show');
-        }
-
-        function closeModal() {
-            modalBackdrop.classList.remove('show');
-            modalContent.classList.remove('show');
-        }
-        
-        modalBackdrop.addEventListener('click', closeModal);
-
-        function showLoading() {
-            modalBody.innerHTML = '<div class="flex justify-center items-center h-48"><div class="spinner"></div></div>';
-            showModal();
-        }
-
-        async function callGemini(prompt) {
-             const apiKey = ""; // Leave blank
-             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-             
-             const payload = {
-                 contents: [{
-                     parts: [{ text: prompt }]
-                 }]
-             };
-
-             try {
-                 const response = await fetch(apiUrl, {
-                     method: 'POST',
-                     headers: { 'Content-Type': 'application/json' },
-                     body: JSON.stringify(payload)
-                 });
-
-                 if (!response.ok) {
-                     throw new Error(`API Error: ${response.statusText}`);
-                 }
-
-                 const result = await response.json();
-                 if (result.candidates && result.candidates.length > 0 &&
-                     result.candidates[0].content && result.candidates[0].content.parts &&
-                     result.candidates[0].content.parts.length > 0) {
-                    // Basic formatting for the response text
-                    return result.candidates[0].content.parts[0].text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/\n/g, '<br>');
-                 } else {
-                    return "Sorry, I couldn't generate a response. The model's output was empty.";
-                 }
-             } catch (error) {
-                 console.error("Gemini API call failed:", error);
-                 return `<p class="text-red-400"><strong>Error:</strong> Could not connect to the AI service. Please check your connection and try again.</p><p class="text-xs text-gray-500 mt-2">${error.message}</p>`;
-             }
-        }
-
-        async function getAITutorExplanation(topic) {
-            modalTitle.innerText = `✨ AI Tutor: ${topic}`;
-            showLoading();
-            const prompt = `You are an expert GATE CSE tutor. Explain the topic "${topic}" for a student aiming for AIR 1. Be concise but thorough. Focus on the core concepts, key formulas or algorithms if any, and common pitfalls or important points to remember for the GATE exam. Use a simple analogy if it helps clarify the concept.`;
-            const explanation = await callGemini(prompt);
-            modalBody.innerHTML = explanation;
-        }
-
-        async function generatePracticeProblems(subject) {
-            const topic = prompt(`Enter a specific topic from "${subject}" to generate practice problems for:`);
-            if (!topic || topic.trim() === "") return;
-
-            modalTitle.innerText = `✨ Practice Problems: ${topic}`;
-            showLoading();
-            const prompt = `You are a GATE CSE expert question creator. Generate 3 high-quality practice problems on the topic "${topic}" from the subject "${subject}". The problems should be in the style of the GATE exam, including a mix of MCQ, MSQ, and NAT types. Provide a detailed, step-by-step solution for each problem after all the questions. Clearly label the question type (MCQ/MSQ/NAT) and the correct answer.`;
-            const problems = await callGemini(prompt);
-            modalBody.innerHTML = problems;
-        }
-    </script>
+    <!-- Our Custom JavaScript -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
