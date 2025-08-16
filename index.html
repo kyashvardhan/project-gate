@@ -91,6 +91,35 @@
             to { transform: rotate(360deg); }
         }
     </style>
+    
+    <!-- FIREBASE SETUP SCRIPT -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      // We only need the Firestore database for this project
+      import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      // Your web app's Firebase configuration (FROM YOUR CONSOLE)
+      const firebaseConfig = {
+        apiKey: "AIzaSyDNgieI85u3n1iR3TfPPUGGzvjG5OVsByI",
+        authDomain: "project-x-dfa14.firebaseapp.com",
+        projectId: "project-x-dfa14",
+        storageBucket: "project-x-dfa14.appspot.com",
+        messagingSenderId: "870709683376",
+        appId: "1:870709683376:web:2dca1b1ff58781cfc9c775",
+        measurementId: "G-W8P16T5RE4"
+      };
+
+      // Initialize Firebase and Firestore
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Make db and Firestore functions accessible globally so other functions in our main script can use them
+      window.db = db;
+      window.doc = doc;
+      window.setDoc = setDoc;
+      window.getDoc = getDoc;
+    </script>
 </head>
 <body class="min-h-screen p-4 sm:p-6 lg:p-8 bg-dots-pattern">
     <div class="max-w-7xl mx-auto">
@@ -192,7 +221,6 @@
     <script>
         // --- DATA STRUCTURE FOR THE ENTIRE PLAN ---
         const gatePlan = [
-            // ... (Same gatePlan data as before)
             {
                 subject: "Discrete Mathematics",
                 duration: 14,
@@ -327,39 +355,71 @@
         let progressData = {};
         let reportChart;
 
+        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', init);
 
+        // UPDATED init function
         function init() {
-            loadProgress();
-            renderSubjects();
+            // This function starts everything when the page loads.
             updateCountdown();
             setInterval(updateCountdown, 1000);
-            updateOverallProgress();
-            renderReportChart();
             feather.replace();
-            updateCurrentFocus();
+            // The new loadProgress function will handle all the rendering
+            // after it successfully fetches your data from the database.
+            loadProgress();
         }
 
-        function loadProgress() {
-            const savedProgress = localStorage.getItem('gateProgress');
-            if (savedProgress) {
-                progressData = JSON.parse(savedProgress);
+        // --- DATA HANDLING (DATABASE) ---
+        // UPDATED loadProgress function
+        async function loadProgress() {
+            // This function loads your progress from the cloud when the page opens.
+            if (!window.db) { // If Firebase isn't ready, it waits a moment and tries again.
+                setTimeout(loadProgress, 100);
+                return;
+            }
+            const progressDocRef = window.doc(window.db, "progress", "userData");
+            const docSnap = await window.getDoc(progressDocRef);
+
+            if (docSnap.exists()) {
+                // If progress is found in the database, it loads it.
+                progressData = docSnap.data();
+                console.log("Progress loaded from Firestore.");
             } else {
+                // If it's your first time, it creates a fresh progress plan.
                 gatePlan.forEach((subject, sIndex) => {
                     progressData[sIndex] = subject.tasks.map(() => false);
                 });
+                console.log("No existing progress found. Initializing new plan.");
+            }
+            
+            // After loading the data, it builds the dashboard on the screen.
+            renderSubjects();
+            updateOverallProgress();
+            renderReportChart();
+            updateCurrentFocus();
+        }
+
+        // UPDATED saveProgress function
+        async function saveProgress() {
+            // This function saves your current progress to the cloud.
+            if (!window.db) return; // Checks if Firebase is connected
+            try {
+                // Creates a reference to a document named "userData" inside a "progress" collection
+                const progressDocRef = window.doc(window.db, "progress", "userData");
+                // Saves your entire progressData object to that document
+                await window.setDoc(progressDocRef, progressData);
+                console.log("Progress saved to Firestore!");
+            } catch (e) {
+                console.error("Error saving progress: ", e);
             }
         }
 
-        function saveProgress() {
-            localStorage.setItem('gateProgress', JSON.stringify(progressData));
-        }
-
+        // --- RENDERING ---
         function renderSubjects() {
             const container = document.getElementById('subjects-container');
             container.innerHTML = '';
             gatePlan.forEach((subject, sIndex) => {
-                const completedTasks = progressData[sIndex].filter(Boolean).length;
+                const completedTasks = progressData[sIndex] ? progressData[sIndex].filter(Boolean).length : 0;
                 const totalTasks = subject.tasks.length;
                 const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
@@ -392,7 +452,7 @@
                                     <div class="task-item flex items-center p-2 rounded-lg justify-between">
                                         <div class="flex items-center">
                                             <input type="checkbox" id="task-${sIndex}-${tIndex}" class="h-4 w-4 rounded bg-gray-700 border-gray-600 text-purple-600 focus:ring-purple-500" 
-                                                onchange="updateProgress(${sIndex}, ${tIndex})" ${progressData[sIndex][tIndex] ? 'checked' : ''}>
+                                                onchange="updateProgress(${sIndex}, ${tIndex})" ${progressData[sIndex] && progressData[sIndex][tIndex] ? 'checked' : ''}>
                                             <label for="task-${sIndex}-${tIndex}" class="ml-3 text-sm text-gray-300">
                                                 <span class="font-semibold">${task.day}:</span> ${task.topic}
                                             </label>
@@ -411,12 +471,10 @@
             feather.replace();
         }
 
-        // --- All other functions (renderReportChart, updateProgress, etc.) remain the same ---
-        // --- ... Paste the existing JS functions here ... ---
         function renderReportChart() {
             const ctx = document.getElementById('reportChart').getContext('2d');
             const labels = gatePlan.map(s => s.subject);
-            const data = gatePlan.map((subject, sIndex) => progressData[sIndex].filter(Boolean).length);
+            const data = gatePlan.map((subject, sIndex) => progressData[sIndex] ? progressData[sIndex].filter(Boolean).length : 0);
 
             reportChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -449,9 +507,10 @@
             });
         }
 
+        // --- UPDATE LOGIC ---
         function updateProgress(sIndex, tIndex) {
             progressData[sIndex][tIndex] = !progressData[sIndex][tIndex];
-            saveProgress();
+            saveProgress(); // This now saves to Firestore
 
             const completedTasks = progressData[sIndex].filter(Boolean).length;
             const totalTasks = gatePlan[sIndex].tasks.length;
@@ -469,7 +528,9 @@
             let totalCompleted = 0;
             let totalTasks = 0;
             gatePlan.forEach((subject, sIndex) => {
-                totalCompleted += progressData[sIndex].filter(Boolean).length;
+                if (progressData[sIndex]) {
+                    totalCompleted += progressData[sIndex].filter(Boolean).length;
+                }
                 totalTasks += subject.tasks.length;
             });
             
@@ -485,8 +546,10 @@
         }
 
         function updateReportChartData() {
-            reportChart.data.datasets[0].data = gatePlan.map((subject, sIndex) => progressData[sIndex].filter(Boolean).length);
-            reportChart.update();
+            if (reportChart) {
+                reportChart.data.datasets[0].data = gatePlan.map((subject, sIndex) => progressData[sIndex] ? progressData[sIndex].filter(Boolean).length : 0);
+                reportChart.update();
+            }
         }
 
         function updateCountdown() {
@@ -524,8 +587,7 @@
             document.getElementById('current-focus').textContent = currentSubject;
         }
 
-        // --- NEW GEMINI API FEATURES ---
-
+        // --- GEMINI API FEATURES ---
         const modalBackdrop = document.getElementById('gemini-modal-backdrop');
         const modalContent = document.getElementById('gemini-modal-content');
         const modalTitle = document.getElementById('modal-title');
